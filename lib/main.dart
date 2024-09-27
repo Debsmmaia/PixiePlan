@@ -51,6 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             ListTile(
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               leading: const Icon(Icons.person, color: Color(0xffd98baf)),
               title: const Text('Perfil',
                   style: TextStyle(
@@ -65,6 +67,8 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
             ListTile(
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               leading: const Icon(Icons.book, color: Color(0xffd98baf)),
               title: const Text('Meu Planner',
                   style: TextStyle(
@@ -88,9 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
             Image.asset(
               'assets/imagens/logo_pixie.png',
               fit: BoxFit.contain,
-              height: 38,
+              height: 50,
             ),
-            const SizedBox(width: 10), // Espaço entre logo e texto, opcional
           ],
         ),
         centerTitle: true,
@@ -211,19 +214,120 @@ class PlannerPage extends StatelessWidget {
 }
 
 // Nova página que aparece quando o botão flutuante é pressionado
-class NewPage extends StatelessWidget {
+class NewPage extends StatefulWidget {
   const NewPage({super.key});
+
+  @override
+  _NewPageState createState() => _NewPageState();
+}
+
+class _NewPageState extends State<NewPage> {
+  DateTime? selectedDate;
+  Color selectedColor = Colors.transparent; // Cor padrão
+
+  // Método para selecionar a data
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  // Lista de cores para as bolinhas
+  final List<Color> colors = [
+    Color(0xfffeb3df),
+    Color(0xffa3e8a5),
+    Color(0xff97bddc),
+    Color(0xffede493),
+    Color(0xffce9bd7),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nova tarefa'),
-      ),
-      body: Center(
-        child: Text(
-          'Adicionar tarefa',
-          style: TextStyle(fontSize: 24),
+      body: Container(
+        color: selectedColor, // Aplica a cor selecionada ao fundo
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Botão para fechar a página
+            IconButton(
+              icon: Icon(Icons.close, color: Colors.black, size: 30),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            SizedBox(height: 35),
+            Center(
+              child: Text(
+                'Nome tarefa',
+                style: TextStyle(fontSize: 35),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // Seção para escolher a cor
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: colors.map((color) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedColor = color; // Atualiza a cor selecionada
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8.0),
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: color,
+                        border: selectedColor == color
+                            ? Border.all(color: Colors.white, width: 2)
+                            : null,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+
+            SizedBox(height: 20),
+
+            // Campo para selecionar a data
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Data da tarefa', style: TextStyle(fontSize: 20)),
+                  SizedBox(height: 10),
+                  TextField(
+                    onTap: () {
+                      _selectDate(context);
+                    },
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: selectedDate != null
+                          ? DateFormat('dd/MM/yyyy').format(selectedDate!)
+                          : 'Selecione uma data',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
