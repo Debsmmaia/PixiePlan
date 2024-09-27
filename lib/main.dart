@@ -11,7 +11,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trabalho final',
       theme: ThemeData(
-        primaryColor: Color(0xFFFFB2C1), // Rosa Claro
         scaffoldBackgroundColor: Colors.white, // Fundo Branco
         fontFamily: 'Fredoka',
       ),
@@ -52,10 +51,10 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             ListTile(
-              leading: const Icon(Icons.person, color: Color(0xff6b1793)),
+              leading: const Icon(Icons.person, color: Color(0xffd98baf)),
               title: const Text('Perfil',
                   style: TextStyle(
-                    color: Color(0xffea4492),
+                    color: Color(0xffbf567d),
                     fontSize: 20,
                   )),
               onTap: () {
@@ -66,10 +65,10 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.book, color: Color(0xff6b1793)),
+              leading: const Icon(Icons.book, color: Color(0xffd98baf)),
               title: const Text('Meu Planner',
                   style: TextStyle(
-                    color: Color(0xffea4492),
+                    color: Color(0xffbf567d),
                     fontSize: 20,
                   )),
               onTap: () {
@@ -83,9 +82,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(fontSize: 30),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Image.asset(
+              'assets/imagens/logo_pixie.png',
+              fit: BoxFit.contain,
+              height: 38,
+            ),
+            const SizedBox(width: 10), // Espaço entre logo e texto, opcional
+          ],
         ),
         centerTitle: true,
       ),
@@ -97,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
             MaterialPageRoute(builder: (context) => const NewPage()),
           );
         },
-        backgroundColor: Color(0xffea4492),
+        backgroundColor: Color(0xffbf567d),
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
         child: const Icon(Icons.add), // Ícone de "Adicionar"
@@ -143,7 +149,7 @@ class PlannerPage extends StatelessWidget {
         Center(
           child: Text(
             'Seja bem-vindo(a)!',
-            style: TextStyle(fontSize: 20, color: Color(0xffea4492)),
+            style: TextStyle(fontSize: 20, color: Color(0xffbf567d)),
           ),
         ),
         SizedBox(height: 20), // Espaçamento
@@ -170,7 +176,7 @@ class PlannerPage extends StatelessWidget {
                   margin: EdgeInsets.symmetric(horizontal: 5),
                   padding: EdgeInsets.symmetric(horizontal: 5),
                   decoration: BoxDecoration(
-                    color: isToday ? Color(0xffea4492) : Color(0xffff9cda),
+                    color: isToday ? Color(0xffbf567d) : Color(0xffd98baf),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
