@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color(0xFFFFB2C1), // Rosa Claro
         scaffoldBackgroundColor: Colors.white, // Fundo Branco
+        fontFamily: 'Fredoka',
       ),
       home: const MyHomePage(title: 'PixiePlan'),
     );
@@ -79,11 +80,14 @@ class _MyHomePageState extends State<MyHomePage> {
       body: page,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navega para a nova página quando o botão é pressionado
+          //Página de criação de tarefa
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const NewPage()),
           );
         },
+        backgroundColor: Color(0xffea4492),
+        foregroundColor: Colors.white,
+        shape: const CircleBorder(),
         child: const Icon(Icons.add), // Ícone de "Adicionar"
       ),
     );
