@@ -9,12 +9,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Hello World',
+      title: 'Trabalho final',
       theme: ThemeData(
         primaryColor: Color(0xFFFFB2C1), // Rosa Claro
         scaffoldBackgroundColor: Colors.white, // Fundo Branco
       ),
-      home: const MyHomePage(title: 'Planner'),
+      home: const MyHomePage(title: 'PixiePlan'),
     );
   }
 }
@@ -74,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       appBar: AppBar(
         title: Text(widget.title),
+        centerTitle: true,
       ),
       body: page,
       floatingActionButton: FloatingActionButton(
@@ -123,13 +124,13 @@ class PlannerPage extends StatelessWidget {
       children: [
         Center(
           child: Text(
-            DateFormat('MMMM yyyy').format(now), // Mês e ano atual
-            style: TextStyle(fontSize: 24),
+            'Seja bem-vindo(a)!',
+            style: TextStyle(fontSize: 20, color: Color(0xffea4492)),
           ),
         ),
         SizedBox(height: 20), // Espaçamento
         Container(
-          height: 80, // Altura do ListView horizontal
+          height: 60,
           child: ListView.builder(
             scrollDirection: Axis.horizontal, // Rolagem horizontal
             itemCount: days.length, // Número de dias
@@ -144,22 +145,35 @@ class PlannerPage extends StatelessWidget {
 
               return GestureDetector(
                 onTap: () {
-                  // Ação ao clicar no dia
-                  print(
-                      'Dia ${day.day} de ${DateFormat('MMMM').format(day)} selecionado');
+                  // modificar a página home
                 },
                 child: Container(
-                  width: 70,
+                  width: 50,
                   margin: EdgeInsets.symmetric(horizontal: 5),
+                  padding: EdgeInsets.symmetric(horizontal: 5),
                   decoration: BoxDecoration(
-                    color:
-                        isToday ? Color(0xffe82d6b) : Colors.pink, // Cor do dia
-                    borderRadius: BorderRadius.circular(10),
+                    color: isToday ? Color(0xffea4492) : Color(0xffff9cda),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
-                    child: Text(
-                      '${day.day}', // Mostra o dia
-                      style: TextStyle(color: Colors.white),
+                    child: Column(
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Centraliza o conteúdo
+                      children: [
+                        Text(
+                          '${day.day}', // Mostra o dia
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17), // Estilo do dia
+                        ),
+                        Text(
+                          DateFormat('MMM').format(
+                              day), // Mostra o mês em formato abreviado (Jan, Feb...)
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12), // Estilo do mês
+                        ),
+                      ],
                     ),
                   ),
                 ),
