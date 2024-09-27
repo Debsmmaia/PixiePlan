@@ -48,11 +48,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       drawer: Drawer(
+        width: 200,
         child: Column(
           children: [
             ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Perfil'),
+              leading: const Icon(Icons.person, color: Color(0xff6b1793)),
+              title: const Text('Perfil',
+                  style: TextStyle(
+                    color: Color(0xffea4492),
+                    fontSize: 20,
+                  )),
               onTap: () {
                 setState(() {
                   selectedIndex = 0;
@@ -61,8 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.book),
-              title: const Text('Meu Planner'),
+              leading: const Icon(Icons.book, color: Color(0xff6b1793)),
+              title: const Text('Meu Planner',
+                  style: TextStyle(
+                    color: Color(0xffea4492),
+                    fontSize: 20,
+                  )),
               onTap: () {
                 setState(() {
                   selectedIndex = 1;
@@ -74,7 +83,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: TextStyle(fontSize: 30),
+        ),
         centerTitle: true,
       ),
       body: page,
@@ -102,7 +114,9 @@ class ProfilePage extends StatelessWidget {
     return Center(
       child: Text(
         'Página de Perfil',
-        style: TextStyle(fontSize: 24),
+        style: TextStyle(
+          fontSize: 24, // Corrigido aqui
+        ),
       ),
     );
   }
