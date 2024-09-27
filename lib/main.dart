@@ -300,16 +300,15 @@ class _NewPageState extends State<NewPage> {
                 }).toList(),
               ),
             ),
-
             SizedBox(height: 20),
 
             // Campo para selecionar a data
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Data da tarefa', style: TextStyle(fontSize: 20)),
+                  Text('Data da tarefa', style: TextStyle(fontSize: 22)),
                   SizedBox(height: 10),
                   TextField(
                     onTap: () {
