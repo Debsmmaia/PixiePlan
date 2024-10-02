@@ -138,13 +138,15 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Página de Perfil',
-        style: TextStyle(
-          fontSize: 24, // Corrigido aqui
+    return ListView(
+      children: <Widget>[
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text("Faça login!"),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -245,7 +247,7 @@ class NewPage extends StatefulWidget {
 
 class _NewPageState extends State<NewPage> {
   DateTime? selectedDate;
-  Color selectedColor = Colors.transparent; // Cor padrão
+  Color selectedColor = Color(0xfffeb3df); // Cor padrão
 
   // Método para selecionar a data
   Future<void> _selectDate(BuildContext context) async {
@@ -273,27 +275,34 @@ class _NewPageState extends State<NewPage> {
 
   @override
   Widget build(BuildContext context) {
+    var _controller = TextEditingController();
+
     return Scaffold(
       body: Container(
-        color: selectedColor, // Aplica a cor selecionada ao fundo
+        color: selectedColor,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Botão para fechar a página
+          children: <Widget>[
             IconButton(
-              icon: Icon(Icons.close, color: Colors.black, size: 30),
+              icon: Icon(Icons.close, color: Color(0xff383636), size: 30),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             SizedBox(height: 35),
-            Center(
-              child: Text(
-                'Nome tarefa',
-                style: TextStyle(fontSize: 35),
+
+            TextFormField(
+              controller: _controller,
+              style: TextStyle(fontSize: 30),
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                hintText: "Nome da tarefa",
+                border: InputBorder.none,
               ),
+              onSaved: (String? val) {},
             ),
-            SizedBox(height: 20),
+
+            Padding(padding: const EdgeInsets.all(20)),
 
             // Seção para escolher a cor
             Center(
@@ -346,6 +355,15 @@ class _NewPageState extends State<NewPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+
+            Padding(padding: const EdgeInsets.all(10)),
+
+            Center(
+              child: ElevatedButton(
+                onPressed: () {},
+                child: Text("Criar tarefa"),
               ),
             ),
           ],
