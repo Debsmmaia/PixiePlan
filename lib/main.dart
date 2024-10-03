@@ -9,14 +9,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifier(
+    return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      title: 'Trabalho final',
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white, // Fundo Branco
-        fontFamily: 'Fredoka',
+      child: MaterialApp(
+        title: 'Trabalho final',
+        theme: ThemeData(
+          scaffoldBackgroundColor: Colors.white,
+          fontFamily: 'Fredoka',
+        ),
+        home: const MyHomePage(title: 'PixiePlan'),
       ),
-      home: const MyHomePage(title: 'PixiePlan'),
     );
   }
 }
@@ -34,7 +36,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Determina a página a ser exibida com base no índice selecionado
     Widget page;
     switch (selectedIndex) {
       case 0:
@@ -47,91 +48,100 @@ class _MyHomePageState extends State<MyHomePage> {
         page = const Center(child: Text('Página Não Encontrada'));
     }
 
-    return Scaffold(
-        drawer: Drawer(
-          width: 200,
-          child: Column(
-            children: [
-              ListTile(
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                leading: const Icon(Icons.person, color: Color(0xffd98baf)),
-                title: const Text('Perfil',
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          drawer: Drawer(
+            width: 200,
+            child: Column(
+              children: [
+                ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  leading: const Icon(Icons.person, color: Color(0xffd98baf)),
+                  title: const Text(
+                    'Perfil',
                     style: TextStyle(
                       color: Color(0xffbf567d),
                       fontSize: 20,
-                    )),
-                onTap: () {
-                  setState(() {
-                    selectedIndex = 0;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                leading: const Icon(Icons.book, color: Color(0xffd98baf)),
-                title: const Text('Meu Planner',
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      selectedIndex = 0;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  leading: const Icon(Icons.book, color: Color(0xffd98baf)),
+                  title: const Text(
+                    'Meu Planner',
                     style: TextStyle(
                       color: Color(0xffbf567d),
                       fontSize: 20,
-                    )),
-                onTap: () {
-                  setState(() {
-                    selectedIndex = 1;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      selectedIndex = 1;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Image.asset(
-                'assets/imagens/logo_pixie.png',
-                fit: BoxFit.contain,
-                height: 50,
-              ),
-            ],
+          appBar: AppBar(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Image.asset(
+                  'assets/imagens/logo_pixie.png',
+                  fit: BoxFit.contain,
+                  height: 50,
+                ),
+              ],
+            ),
+            centerTitle: true,
           ),
-          centerTitle: true,
-        ),
-        body: page,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // Navegar para a página de nova tarefa com a transição personalizada
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const NewPage(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  const begin =
-                      Offset(0.0, 1.0); // Inicia fora da tela, embaixo
-                  const end = Offset.zero; // Fim no centro da tela
-                  const curve = Curves.ease;
+          body: page,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              // Navegar para a página de nova tarefa com a transição personalizada
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const NewPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    const begin =
+                        Offset(0.0, 1.0); // Inicia fora da tela, embaixo
+                    const end = Offset.zero; // Fim no centro da tela
+                    const curve = Curves.ease;
 
-                  var tween = Tween(begin: begin, end: end)
-                      .chain(CurveTween(curve: curve));
-                  var offsetAnimation = animation.drive(tween);
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+                    var offsetAnimation = animation.drive(tween);
 
-                  return SlideTransition(
-                    position: offsetAnimation,
-                    child: child,
-                  );
-                },
-              ),
-            );
-          },
-          backgroundColor: Color(0xffbf567d),
-          foregroundColor: Colors.white,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add), // Ícone de "Adicionar"
-        ));
+                    return SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    );
+                  },
+                ),
+              );
+            },
+            backgroundColor: const Color(0xffbf567d),
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+            child: const Icon(Icons.add), // Ícone de "Adicionar"
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -158,84 +168,123 @@ class PlannerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<MyAppState>();
     DateTime now = DateTime.now(); // Data atual
-    int daysInMonth =
-        DateTime(now.year, now.month + 1, 0).day; // Total de dias no mês
-    List<DateTime> days = List.generate(daysInMonth, (index) {
-      return DateTime(now.year, now.month, index + 1); // Gera os dias do mês
-    });
 
-    // Encontra o índice do dia atual
-    int todayIndex = days.indexWhere((day) =>
-        day.day == now.day && day.month == now.month && day.year == now.year);
+    // Criação de uma lista com todos os dias do ano
+    List<DateTime> days = [];
+    DateTime startDate = DateTime(2024, 1, 1); // Data inicial
+    DateTime endDate = DateTime(2100, 12, 31); // Data final
 
-    // Cria o ScrollController e define a posição inicial
-    final ScrollController scrollController = ScrollController(
-      initialScrollOffset:
-          todayIndex * 75.0, // Deslocamento inicial baseado no dia
-    );
+    for (DateTime date = startDate;
+        date.isBefore(endDate.add(Duration(days: 1)));
+        date = date.add(Duration(days: 1))) {
+      days.add(date);
+    }
+
+    // Configuração para a visualização de dias
+    int itemsPerPage = 7; // Número de dias exibidos por página
+    int totalPages =
+        (days.length / itemsPerPage).ceil(); // Número total de páginas
 
     return Column(
       children: [
         Center(
           child: Text(
-            'Seja bem-vindo(a)!',
+            '${DateFormat('dd/MM/yyyy').format(appState.selectedDay)}',
             style: TextStyle(fontSize: 20, color: Color(0xffbf567d)),
           ),
         ),
-        SizedBox(height: 20), // Espaçamento
+        SizedBox(height: 10),
         Container(
-          height: 60,
-          child: ListView.builder(
-            controller: scrollController, // Vincula o ScrollController
-            scrollDirection: Axis.horizontal, // Rolagem horizontal
-            itemCount: days.length, // Número de dias
-            itemBuilder: (context, index) {
-              DateTime day = days[index];
-              bool isToday = day.day == now.day &&
-                  day.month == now.month &&
-                  day.year == now.year;
+          height: 70,
+          child: PageView.builder(
+            itemCount: totalPages, // Número total de páginas
+            itemBuilder: (context, pageIndex) {
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: itemsPerPage, // Mostra 7 dias por vez
+                itemBuilder: (context, index) {
+                  int dayIndex = pageIndex * itemsPerPage +
+                      index; // Calcula o índice do dia
+                  if (dayIndex >= days.length)
+                    return SizedBox
+                        .shrink(); // Evita erro de índice fora do alcance
 
-              return GestureDetector(
-                onTap: () {
-                  // Modificar a página home ou qualquer outra ação ao tocar no dia
-                },
-                child: Container(
-                  width: 50,
-                  margin: EdgeInsets.symmetric(horizontal: 5),
-                  padding: EdgeInsets.symmetric(horizontal: 5),
-                  decoration: BoxDecoration(
-                    color: isToday ? Color(0xffbf567d) : Color(0xffd98baf),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Centraliza o conteúdo
-                      children: [
-                        Text(
-                          '${day.day}', // Mostra o dia
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 17), // Estilo do dia
+                  DateTime day = days[dayIndex];
+
+                  // Verifica se o dia é o selecionado
+                  final plannerState = context.watch<MyAppState>();
+                  bool isSelected =
+                      day.isAtSameMomentAs(plannerState.selectedDay);
+                  bool isToday =
+                      day.isAtSameMomentAs(now); // Verifica se é hoje
+
+                  // Define a cor do botão
+                  Color buttonColor = isSelected
+                      ? Color(0xffbf567d)
+                      : (isToday ? Colors.blue : Color(0xffd98baf));
+
+                  return GestureDetector(
+                    onTap: () {
+                      context
+                          .read<MyAppState>()
+                          .selectDay(day); // Atualiza o dia selecionado
+                    },
+                    child: Container(
+                      width: 45,
+                      margin: EdgeInsets.symmetric(horizontal: 3),
+                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: buttonColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${day.day}',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                            Text(
+                              DateFormat('EEE').format(day),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          DateFormat('MMM').format(
-                              day), // Mostra o mês em formato abreviado (Jan, Feb...)
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12), // Estilo do mês
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           ),
         ),
       ],
     );
+  }
+}
+
+class MyAppState extends ChangeNotifier {
+  DateTime _selectedDay;
+
+  MyAppState() : _selectedDay = DateTime.now() {
+    print(
+        "Dia inicial selecionado: $_selectedDay"); // Adicione esta linha para depuração
+    notifyListeners(); // Notifica os ouvintes que o valor inicial foi definido
+  }
+
+  DateTime get selectedDay => _selectedDay;
+
+  void selectDay(DateTime day) {
+    _selectedDay = day;
+    print("$_selectedDay"); // Adicione esta linha
+    notifyListeners(); // Notifica os ouvintes que o dia foi alterado
   }
 }
 
@@ -372,32 +421,5 @@ class _NewPageState extends State<NewPage> {
         ),
       ),
     );
-  }
-}
-
-class MyAppState extends ChangeNotifier {
-  int selectedIndex = 1; // Página inicial
-
-  // Mapa para armazenar atividades por data
-  final Map<DateTime, List<String>> activities = {};
-
-  // Atualiza o índice da página
-  void updateSelectedIndex(int index) {
-    selectedIndex = index;
-    notifyListeners();
-  }
-
-  // Adiciona uma atividade para uma data específica
-  void addActivity(DateTime date, String activity) {
-    if (!activities.containsKey(date)) {
-      activities[date] = [];
-    }
-    activities[date]!.add(activity);
-    notifyListeners();
-  }
-
-  // Obtém as atividades de uma data específica
-  List<String> getActivities(DateTime date) {
-    return activities[date] ?? [];
   }
 }
