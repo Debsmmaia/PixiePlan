@@ -145,20 +145,74 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final TextEditingController _controllerUsername = TextEditingController();
+  final TextEditingController _controllerPassword = TextEditingController();
+  bool _obscureText = true; // Controla a visibilidade da senha
+
+  @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: <Widget>[
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text("Faça login!"),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Login"),
+      ),
+      body: ListView(
+        children: <Widget>[
+          Center(
+            // Alinha o Container no centro da tela
+            child: Container(
+              width: 300, // Defina a largura desejada do Container
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextFormField(
+                    controller: _controllerUsername,
+                    style: TextStyle(fontSize: 20),
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      hintText: "Usuário",
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLength: 30,
+                  ),
+                  SizedBox(height: 20), // Espaçamento entre os campos
+                  TextFormField(
+                    controller: _controllerPassword,
+                    style: TextStyle(fontSize: 20),
+                    textAlign: TextAlign.center,
+                    obscureText:
+                        _obscureText, // Controla se a senha é visível ou não
+                    decoration: InputDecoration(
+                      hintText: "Senha",
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
