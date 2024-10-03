@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
 
@@ -8,7 +9,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ChangeNotifier(
+      create: (context) => MyAppState(),
       title: 'Trabalho final',
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white, // Fundo Branco
@@ -370,5 +372,32 @@ class _NewPageState extends State<NewPage> {
         ),
       ),
     );
+  }
+}
+
+class MyAppState extends ChangeNotifier {
+  int selectedIndex = 1; // Página inicial
+
+  // Mapa para armazenar atividades por data
+  final Map<DateTime, List<String>> activities = {};
+
+  // Atualiza o índice da página
+  void updateSelectedIndex(int index) {
+    selectedIndex = index;
+    notifyListeners();
+  }
+
+  // Adiciona uma atividade para uma data específica
+  void addActivity(DateTime date, String activity) {
+    if (!activities.containsKey(date)) {
+      activities[date] = [];
+    }
+    activities[date]!.add(activity);
+    notifyListeners();
+  }
+
+  // Obtém as atividades de uma data específica
+  List<String> getActivities(DateTime date) {
+    return activities[date] ?? [];
   }
 }
