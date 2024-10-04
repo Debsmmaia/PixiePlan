@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
 
+//classe que defini o geral do app
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+//classe da páigna inicial do app
 class MyHomePage extends StatefulWidget {
   final String title;
   const MyHomePage({super.key, required this.title});
@@ -32,30 +34,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int selectedIndex = 1; // Inicializa com a página "Meu Planner"
+  int selectedIndex = 1;
 
   @override
   Widget build(BuildContext context) {
+    //cria a mudança de tela
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = const ProfilePage();
+        page = const LoginPage();
         break;
       case 1:
-        page = const PlannerPage(); // Página inicial como "Meu Planner"
+        page = const PlannerPage();
         break;
       default:
         page = const Center(child: Text('Página Não Encontrada'));
     }
 
     return LayoutBuilder(
+      //cria widgets de forma dinâmica
       builder: (context, constraints) {
         return Scaffold(
+          //fornece estrutura básica
           drawer: Drawer(
+            //barra de navegaçaõ sanduiche
             width: 200,
             child: Column(
               children: [
                 ListTile(
+                  //lista com os ícones
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   leading: const Icon(Icons.person, color: Color(0xffd98baf)),
@@ -85,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   onTap: () {
+                    //ao clicar muda a página
                     setState(() {
                       selectedIndex = 1;
                     });
@@ -95,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           appBar: AppBar(
+            //barra acima com a logo
             title: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -109,8 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           body: page,
           floatingActionButton: FloatingActionButton(
+            //botão de adicionar uma nova página
             onPressed: () {
-              // Navegar para a página de nova tarefa com a transição personalizada
               Navigator.of(context).push(
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
@@ -145,14 +154,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _controllerUsername = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
   bool _obscureText = true; // Controla a visibilidade da senha
@@ -175,7 +184,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   TextFormField(
                     controller: _controllerUsername,
                     style: TextStyle(fontSize: 20),
-                    textAlign: TextAlign.center,
                     decoration: InputDecoration(
                       hintText: "Usuário",
                       border: OutlineInputBorder(),
@@ -186,7 +194,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   TextFormField(
                     controller: _controllerPassword,
                     style: TextStyle(fontSize: 20),
-                    textAlign: TextAlign.center,
                     obscureText:
                         _obscureText, // Controla se a senha é visível ou não
                     decoration: InputDecoration(
@@ -206,6 +213,33 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                     ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const ProfilePage(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(0.0, 1.0);
+                            const end = Offset.zero;
+                            const curve = Curves.ease;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+                            var offsetAnimation = animation.drive(tween);
+
+                            return SlideTransition(
+                              position: offsetAnimation,
+                              child: child,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('Login'),
                   ),
                 ],
               ),
@@ -277,7 +311,7 @@ class PlannerPage extends StatelessWidget {
                   // Define a cor do botão
                   Color buttonColor = isSelected
                       ? Color(0xffbf567d)
-                      : (isToday ? Colors.blue : Color(0xffd98baf));
+                      : (isToday ? Color(0xffbf567d) : Color(0xffd98baf));
 
                   return GestureDetector(
                     onTap: () {
@@ -320,6 +354,40 @@ class PlannerPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final String username = "Nome do Usuário";
+
+    return Scaffold(
+      body: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.close, color: Color(0xff383636), size: 30),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            SizedBox(height: 35),
+
+            // Adicione mais informações ou widgets conforme necessário
+            ElevatedButton(
+              onPressed: () {
+                // Ação para editar perfil ou outras funcionalidades
+              },
+              child: const Text('Editar Perfil'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -396,15 +464,19 @@ class _NewPageState extends State<NewPage> {
             ),
             SizedBox(height: 35),
 
-            TextFormField(
-              controller: _controller,
-              style: TextStyle(fontSize: 30),
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                hintText: "Nome da tarefa",
-                border: InputBorder.none,
+            Container(
+              width: 400,
+              child: Center(
+                child: TextFormField(
+                  controller: _controller,
+                  style: TextStyle(fontSize: 30),
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: "Nome da tarefa",
+                    border: InputBorder.none,
+                  ),
+                ),
               ),
-              onSaved: (String? val) {},
             ),
 
             Padding(padding: const EdgeInsets.all(20)),
@@ -446,7 +518,7 @@ class _NewPageState extends State<NewPage> {
                 children: [
                   Text('Data da tarefa', style: TextStyle(fontSize: 22)),
                   SizedBox(height: 10),
-                  TextField(
+                  TextFormField(
                     onTap: () {
                       _selectDate(context);
                     },
