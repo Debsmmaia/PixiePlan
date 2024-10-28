@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../state/my_app_state.dart';
 import 'edit_new_page.dart';
 
@@ -12,19 +13,8 @@ class PlannerPage extends StatelessWidget {
     final appState = context.watch<MyAppState>();
     DateTime now = DateTime.now(); // Data atual
 
-    // Lista de dias do ano
-    List<DateTime> days = [];
-    DateTime startDate = DateTime(2024, 1, 1);
-    DateTime endDate = DateTime(2100, 12, 31);
-
-    for (DateTime date = startDate;
-        date.isBefore(endDate.add(const Duration(days: 1)));
-        date = date.add(const Duration(days: 1))) {
-      days.add(date);
-    }
-
-    int itemsPerPage = 7;
-    int totalPages = (days.length / itemsPerPage).ceil();
+    // Calcula o primeiro dia da semana atual (domingo)
+    DateTime firstDayOfCurrentWeek = now.subtract(Duration(days: now.weekday));
 
     return Column(
       children: [
@@ -38,19 +28,18 @@ class PlannerPage extends StatelessWidget {
         Container(
           height: 70,
           child: PageView.builder(
-            itemCount: totalPages,
             itemBuilder: (context, pageIndex) {
+              DateTime firstDayOfWeek =
+                  firstDayOfCurrentWeek.add(Duration(days: pageIndex * 7));
+              List<DateTime> days = List.generate(
+                  7, (index) => firstDayOfWeek.add(Duration(days: index)));
+
               return ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: itemsPerPage,
+                itemCount: days.length,
                 itemBuilder: (context, index) {
-                  int dayIndex = pageIndex * itemsPerPage + index;
-                  if (dayIndex >= days.length) return const SizedBox.shrink();
-
-                  DateTime day = days[dayIndex];
-                  final plannerState = context.watch<MyAppState>();
-                  bool isSelected =
-                      day.isAtSameMomentAs(plannerState.selectedDay);
+                  DateTime day = days[index];
+                  bool isSelected = day.isAtSameMomentAs(appState.selectedDay);
                   bool isToday = day.isAtSameMomentAs(now);
 
                   Color buttonColor = isSelected
@@ -92,59 +81,115 @@ class PlannerPage extends StatelessWidget {
             },
           ),
         ),
-        Padding(padding: const EdgeInsets.all(20)),
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const EditNewPage(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  const begin =
-                      Offset(0.0, 1.0); // Inicia fora da tela, embaixo
-                  const end = Offset.zero; // Fim no centro da tela
-                  const curve = Curves.ease;
+        const SizedBox(height: 20), // Espaçamento entre os containers
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('Tarefas') // Coleção de tarefas no Firestore
+                .where('data',
+                    isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
+                        appState.selectedDay.year,
+                        appState.selectedDay.month,
+                        appState.selectedDay.day,
+                        0,
+                        0)))
+                .where('data',
+                    isLessThan: Timestamp.fromDate(DateTime(
+                        appState.selectedDay.year,
+                        appState.selectedDay.month,
+                        appState.selectedDay.day + 1,
+                        0,
+                        0))) // Aqui
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (!snapshot.hasData)
+                return const Center(child: CircularProgressIndicator());
 
-                  var tween = Tween(begin: begin, end: end)
-                      .chain(CurveTween(curve: curve));
-                  var offsetAnimation = animation.drive(tween);
+              // Verifica se existem tarefas para o dia selecionado
+              if (snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text('Nenhuma tarefa para hoje.'));
+              }
 
-                  return SlideTransition(
-                    position: offsetAnimation,
-                    child: child,
-                  );
-                },
-              ),
-            );
-          },
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 5),
-            width: double.infinity,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Color(0xfffeb3df),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Text(
-              'Nome da tarefa',
-              style: TextStyle(
-                fontSize: 20,
-                color: Color(0xff302d2d),
-              ),
-              textAlign: TextAlign.left,
-            ),
+              return ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                children: snapshot.data!.docs
+                    .map((data) => _buildTaskItem(context, data))
+                    .toList(),
+              );
+            },
           ),
-        )
+        ),
       ],
     );
   }
+
+  Widget _buildTaskItem(BuildContext context, DocumentSnapshot data) {
+    final task = Task.fromSnapshot(data);
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const EditNewPage(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween =
+                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+
+              return SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              );
+            },
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xfffeb3df),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Text(
+          task.nome, // Campo alterado para 'nome'
+          style: const TextStyle(
+            fontSize: 20,
+            color: Color(0xff302d2d),
+          ),
+          textAlign: TextAlign.left,
+        ),
+      ),
+    );
+  }
+}
+
+class Task {
+  final String nome; // Campo alterado para 'nome'
+  final DocumentReference reference;
+
+  Task.fromMap(Map<String, dynamic> map, {required this.reference})
+      : assert(map['nome'] != null), // Alterado para 'nome'
+        nome = map['nome']; // Alterado para 'nome'
+
+  Task.fromSnapshot(DocumentSnapshot snapshot)
+      : this.fromMap(snapshot.data()! as Map<String, dynamic>,
+            reference: snapshot.reference);
+
+  @override
+  String toString() => "Task<$nome>";
 }
