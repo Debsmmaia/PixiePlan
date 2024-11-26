@@ -143,6 +143,25 @@ class _EditNewPageState extends State<EditNewPage> {
                 child: Text("Editar tarefa"),
               ),
             ),
+            Padding(padding: const EdgeInsets.all(10)),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  String taskName = _controller.text;
+                  if (taskName.isNotEmpty && selectedDate != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Tarefa criada: $taskName')),
+                    );
+                    Navigator.of(context).pop();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Preencha todos os campos')),
+                    );
+                  }
+                },
+                child: Text("Excluir Tarefa"),
+              ),
+            ),
           ],
         ),
       ),

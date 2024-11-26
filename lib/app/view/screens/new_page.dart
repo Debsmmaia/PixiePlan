@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:trabalho_final/app/model/todo_model.dart';
+import 'package:trabalho_final/app/service/firestore_service.dart';
+import 'package:uuid/uuid.dart'; // Para gerar IDs únicos
 
 class NewPage extends StatefulWidget {
   const NewPage({super.key});
@@ -10,7 +13,9 @@ class NewPage extends StatefulWidget {
 
 class _NewPageState extends State<NewPage> {
   DateTime? selectedDate;
-  Color selectedColor = Color(0xfffeb3df);
+  Color selectedColor = const Color(0xfffeb3df);
+  final _controller = TextEditingController();
+  final FirestoreService _firestoreService = FirestoreService();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -28,17 +33,44 @@ class _NewPageState extends State<NewPage> {
 
   // Lista de cores para as bolinhas
   final List<Color> colors = [
-    Color(0xfffeb3df),
-    Color(0xffa3e8a5),
-    Color(0xff97bddc),
-    Color(0xffede493),
-    Color(0xffce9bd7),
+    const Color(0xfffeb3df),
+    const Color(0xffa3e8a5),
+    const Color(0xff97bddc),
+    const Color(0xffede493),
+    const Color(0xffce9bd7),
   ];
+
+  Future<void> _createTask() async {
+    if (_controller.text.isEmpty || selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos')),
+      );
+      return;
+    }
+
+    final id = const Uuid().v4();
+    final newTask = TodoModel(
+      id: id,
+      nome: _controller.text,
+      data: selectedDate!,
+      cor: selectedColor.value.toString(),
+    );
+
+    try {
+      await _firestoreService.addTodo(newTask);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tarefa criada com sucesso!')),
+      );
+      Navigator.pop(context); // Voltar para a tela anterior
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao criar tarefa: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    var _controller = TextEditingController();
-
     return Scaffold(
       body: Container(
         color: selectedColor,
@@ -46,27 +78,27 @@ class _NewPageState extends State<NewPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.close, color: Color(0xff383636), size: 30),
+              icon: const Icon(Icons.close, color: Color(0xff383636), size: 30),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            SizedBox(height: 35),
-            Container(
+            const SizedBox(height: 35),
+            SizedBox(
               width: 400,
               child: Center(
                 child: TextFormField(
                   controller: _controller,
-                  style: TextStyle(fontSize: 30),
+                  style: const TextStyle(fontSize: 30),
                   textAlign: TextAlign.center,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: "Nome da tarefa",
                     border: InputBorder.none,
                   ),
                 ),
               ),
             ),
-            Padding(padding: const EdgeInsets.all(20)),
+            const Padding(padding: EdgeInsets.all(20)),
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -93,35 +125,35 @@ class _NewPageState extends State<NewPage> {
                 }).toList(),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Data da tarefa', style: TextStyle(fontSize: 22)),
-                  SizedBox(height: 10),
+                  const Text('Data da tarefa', style: TextStyle(fontSize: 22)),
+                  const SizedBox(height: 10),
                   TextFormField(
                     onTap: () {
                       _selectDate(context);
                     },
                     readOnly: true,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       hintText: selectedDate != null
                           ? DateFormat('dd/MM/yyyy').format(selectedDate!)
                           : 'Selecione uma data',
-                      suffixIcon: Icon(Icons.calendar_today),
+                      suffixIcon: const Icon(Icons.calendar_today),
                     ),
                   ),
                 ],
               ),
             ),
-            Padding(padding: const EdgeInsets.all(10)),
+            const Padding(padding: EdgeInsets.all(10)),
             Center(
               child: ElevatedButton(
-                onPressed: () {},
-                child: Text("Criar tarefa"),
+                onPressed: _createTask,
+                child: const Text("Criar tarefa"),
               ),
             ),
           ],

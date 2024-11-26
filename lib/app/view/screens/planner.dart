@@ -13,7 +13,6 @@ class PlannerPage extends StatelessWidget {
     final appState = context.watch<MyAppState>();
     DateTime now = DateTime.now(); // Data atual
 
-    // Calcula o primeiro dia da semana atual (domingo)
     DateTime firstDayOfCurrentWeek = now.subtract(Duration(days: now.weekday));
 
     return Column(
@@ -45,7 +44,7 @@ class PlannerPage extends StatelessWidget {
                   Color buttonColor = isSelected
                       ? const Color(0xffbf567d)
                       : (isToday
-                          ? const Color(0xffbf567d)
+                          ? const Color(0xffae114b)
                           : const Color(0xffd98baf));
 
                   return GestureDetector(
@@ -85,7 +84,7 @@ class PlannerPage extends StatelessWidget {
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
-                .collection('Tarefas') // Coleção de tarefas no Firestore
+                .collection('todos') // Coleção de tarefas no Firestore
                 .where('data',
                     isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
                         appState.selectedDay.year,
@@ -99,11 +98,12 @@ class PlannerPage extends StatelessWidget {
                         appState.selectedDay.month,
                         appState.selectedDay.day + 1,
                         0,
-                        0))) // Aqui
+                        0)))
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData)
+              if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
+              }
 
               // Verifica se existem tarefas para o dia selecionado
               if (snapshot.data!.docs.isEmpty) {
@@ -124,7 +124,13 @@ class PlannerPage extends StatelessWidget {
   }
 
   Widget _buildTaskItem(BuildContext context, DocumentSnapshot data) {
+    // Converte os dados do snapshot para um objeto Task
     final task = Task.fromSnapshot(data);
+
+    // Obtem a cor do Firestore, com fallback para uma cor padrão
+    final String corHex =
+        task.cor ?? '0xfffeb3df'; // Cor padrão se não houver no banco
+    final Color cor = Color(int.parse(corHex)); // Converte para objeto Color
 
     return GestureDetector(
       onTap: () {
@@ -154,7 +160,7 @@ class PlannerPage extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xfffeb3df),
+          color: cor, // Cor da tarefa obtida do banco
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
@@ -166,7 +172,7 @@ class PlannerPage extends StatelessWidget {
           ],
         ),
         child: Text(
-          task.nome, // Campo alterado para 'nome'
+          task.nome,
           style: const TextStyle(
             fontSize: 20,
             color: Color(0xff302d2d),
@@ -179,17 +185,19 @@ class PlannerPage extends StatelessWidget {
 }
 
 class Task {
-  final String nome; // Campo alterado para 'nome'
+  final String nome;
+  final String? cor;
   final DocumentReference reference;
 
   Task.fromMap(Map<String, dynamic> map, {required this.reference})
-      : assert(map['nome'] != null), // Alterado para 'nome'
-        nome = map['nome']; // Alterado para 'nome'
+      : assert(map['nome'] != null),
+        nome = map['nome'],
+        cor = map['cor'];
 
   Task.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data()! as Map<String, dynamic>,
             reference: snapshot.reference);
 
   @override
-  String toString() => "Task<$nome>";
+  String toString() => "Task<$nome, cor: $cor>";
 }
