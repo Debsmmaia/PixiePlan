@@ -124,37 +124,44 @@ class PlannerPage extends StatelessWidget {
   }
 
   Widget _buildTaskItem(BuildContext context, DocumentSnapshot data) {
-    // Converte os dados do snapshot para um objeto Task
     final task = Task.fromSnapshot(data);
-
-    // Obtem a cor do Firestore, com fallback para uma cor padrão
-    final String corHex =
-        task.cor ?? '0xfffeb3df'; // Cor padrão se não houver no banco
-    final Color cor = Color(int.parse(corHex)); // Converte para objeto Color
+    final String corHex = task.cor ?? '0xfffeb3df';
+    final Color cor = Color(int.parse(corHex));
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const EditNewPage(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              const begin = Offset(0.0, 1.0);
-              const end = Offset.zero;
-              const curve = Curves.ease;
+        final taskId = task.reference.id;
 
-              var tween =
-                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-              var offsetAnimation = animation.drive(tween);
+        if (taskId != null) {
+          // Navegação para a página de edição
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  EditNewPage(
+                      taskId: taskId), // Passando taskId para EditNewPage
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const begin = Offset(0.0, 1.0);
+                const end = Offset.zero;
+                const curve = Curves.ease;
 
-              return SlideTransition(
-                position: offsetAnimation,
-                child: child,
-              );
-            },
-          ),
-        );
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+            ),
+          );
+        } else {
+          // Se o taskId for nulo, exibe um erro
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Erro: Tarefa não encontrada")),
+          );
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
