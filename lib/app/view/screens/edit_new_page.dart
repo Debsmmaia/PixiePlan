@@ -170,9 +170,6 @@ class _EditNewPageState extends State<EditNewPage> {
                     onPressed: _deleteTask,
                     child: Text(
                       "Excluir Tarefa",
-                      style: TextStyle(
-                        color: Colors.red, // Cor do texto vermelha
-                      ),
                     ),
                   ),
                 ],

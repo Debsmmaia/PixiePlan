@@ -13,7 +13,7 @@ class NewPage extends StatefulWidget {
 
 class _NewPageState extends State<NewPage> {
   DateTime? selectedDate;
-  Color selectedColor = const Color(0xfffeb3df);
+  Color selectedColor = const Color(0xffd98baf);
   final _controller = TextEditingController();
   final FirestoreService _firestoreService = FirestoreService();
 
@@ -33,11 +33,11 @@ class _NewPageState extends State<NewPage> {
 
   // Lista de cores para as bolinhas
   final List<Color> colors = [
-    const Color(0xfffeb3df),
-    const Color(0xffa3e8a5),
-    const Color(0xff97bddc),
-    const Color(0xffede493),
-    const Color(0xffce9bd7),
+    const Color(0xffd98baf),
+    const Color(0xff4a4a4a),
+    const Color(0xff6c8eeb),
+    const Color(0xffa78bc9),
+    const Color(0xffe1a0a0),
   ];
 
   Future<void> _createTask() async {
@@ -89,11 +89,18 @@ class _NewPageState extends State<NewPage> {
               child: Center(
                 child: TextFormField(
                   controller: _controller,
-                  style: const TextStyle(fontSize: 30),
+                  style: const TextStyle(
+                    fontSize: 30, // Tamanho da fonte
+                    color: Colors.white, // Cor do texto (branca)
+                  ),
                   textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: "Nome da tarefa",
-                    border: InputBorder.none,
+                    hintStyle: const TextStyle(
+                      color: Colors
+                          .white70, // Cor do texto da dica (com 70% de opacidade)
+                    ),
+                    border: InputBorder.none, // Sem borda
                   ),
                 ),
               ),
@@ -131,7 +138,8 @@ class _NewPageState extends State<NewPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Data da tarefa', style: TextStyle(fontSize: 22)),
+                  const Text('Data da tarefa',
+                      style: TextStyle(fontSize: 22, color: Colors.white)),
                   const SizedBox(height: 10),
                   TextFormField(
                     onTap: () {
@@ -139,11 +147,31 @@ class _NewPageState extends State<NewPage> {
                     },
                     readOnly: true,
                     decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
+                      border: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Colors.white), // Borda branca
+                      ),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color:
+                                Colors.white), // Borda branca quando habilitado
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors.white), // Borda branca quando focado
+                      ),
                       hintText: selectedDate != null
                           ? DateFormat('dd/MM/yyyy').format(selectedDate!)
                           : 'Selecione uma data',
-                      suffixIcon: const Icon(Icons.calendar_today),
+                      suffixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: Colors.white,
+                      ),
+                      hintStyle: const TextStyle(
+                          color: Colors.white), // Cor do texto do hint
+
+                      filled: true,
+                      fillColor: Colors.transparent,
                     ),
                   ),
                 ],

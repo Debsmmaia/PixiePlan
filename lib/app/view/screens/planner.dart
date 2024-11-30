@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trabalho_final/app/view/screens/new_page.dart';
 import '../state/my_app_state.dart';
 import 'edit_new_page.dart';
 
@@ -17,12 +18,6 @@ class PlannerPage extends StatelessWidget {
 
     return Column(
       children: [
-        Center(
-          child: Text(
-            '${DateFormat('dd/MM/yyyy').format(appState.selectedDay)}',
-            style: const TextStyle(fontSize: 20, color: Color(0xffbf567d)),
-          ),
-        ),
         const SizedBox(height: 10),
         Container(
           height: 70,

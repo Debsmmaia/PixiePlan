@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trabalho_final/app/model/todo_model.dart';
 
 class FirestoreService {
   var firestore = FirebaseFirestore.instance;
+  var firebaseAuth = FirebaseAuth.instance;
 
   Future<String> addTodo(TodoModel model) async {
     try {
@@ -88,5 +90,17 @@ class FirestoreService {
       await Future.delayed(const Duration(milliseconds: 700));
     }
     return true;
+  }
+
+  Future<UserCredential> criarUsuario(
+      String email, String senha, String nome) async {
+    try {
+      UserCredential userCred = await firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: senha);
+      return userCred;
+    } on FirebaseException catch (e) {
+      debugPrint("Failed with error '${e.code}': ${e.message}");
+      throw Exception(e.message);
+    }
   }
 }

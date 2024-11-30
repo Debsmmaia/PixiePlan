@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'login.dart';
 import 'planner.dart';
 import 'new_page.dart';
@@ -13,6 +14,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 1;
+
+  void initState() {
+    super.initState();
+    // Bloquear a tela para orientação vertical
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,37 +102,38 @@ class _MyHomePageState extends State<MyHomePage> {
             centerTitle: true,
           ),
           body: page,
-          floatingActionButton: FloatingActionButton(
-            //botão de adicionar uma nova página
-            onPressed: () {
-              Navigator.of(context).push(
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const NewPage(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    const begin =
-                        Offset(0.0, 1.0); // Inicia fora da tela, embaixo
-                    const end = Offset.zero; // Fim no centro da tela
-                    const curve = Curves.ease;
+          floatingActionButton: selectedIndex == 1
+              ? FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const NewPage(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin =
+                              Offset(0.0, 1.0); // Inicia fora da tela, embaixo
+                          const end = Offset.zero; // Fim no centro da tela
+                          const curve = Curves.ease;
 
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    var offsetAnimation = animation.drive(tween);
+                          var tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+                          var offsetAnimation = animation.drive(tween);
 
-                    return SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                      ),
                     );
                   },
-                ),
-              );
-            },
-            backgroundColor: const Color(0xffbf567d),
-            foregroundColor: Colors.white,
-            shape: const CircleBorder(),
-            child: const Icon(Icons.add),
-          ),
+                  backgroundColor: const Color(0xffbf567d),
+                  foregroundColor: Colors.white,
+                  shape: const CircleBorder(),
+                  child: const Icon(Icons.add),
+                )
+              : null, // Não exibe o FAB nas outras telas
         );
       },
     );
