@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trabalho_final/app/view/screens/new_page.dart';
 import '../state/my_app_state.dart';
 import 'edit_new_page.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Certifique-se de importar o Firebase Auth
 
 class PlannerPage extends StatelessWidget {
   const PlannerPage({super.key});
@@ -13,8 +14,15 @@ class PlannerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final appState = context.watch<MyAppState>();
     DateTime now = DateTime.now(); // Data atual
-
     DateTime firstDayOfCurrentWeek = now.subtract(Duration(days: now.weekday));
+
+    User? user =
+        FirebaseAuth.instance.currentUser; // Pega o usuário autenticado
+
+    print('User UID: ${user?.uid}'); // Verifica o UID do usuário autenticado
+
+    // Armazene o valor selecionado como uma cópia da data
+    DateTime selectedDay = appState.selectedDay ?? now;
 
     return Column(
       children: [
@@ -33,7 +41,7 @@ class PlannerPage extends StatelessWidget {
                 itemCount: days.length,
                 itemBuilder: (context, index) {
                   DateTime day = days[index];
-                  bool isSelected = day.isAtSameMomentAs(appState.selectedDay);
+                  bool isSelected = day.isAtSameMomentAs(selectedDay);
                   bool isToday = day.isAtSameMomentAs(now);
 
                   Color buttonColor = isSelected
@@ -77,42 +85,56 @@ class PlannerPage extends StatelessWidget {
         ),
         const SizedBox(height: 20), // Espaçamento entre os containers
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('todos') // Coleção de tarefas no Firestore
-                .where('data',
-                    isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
-                        appState.selectedDay.year,
-                        appState.selectedDay.month,
-                        appState.selectedDay.day,
-                        0,
-                        0)))
-                .where('data',
-                    isLessThan: Timestamp.fromDate(DateTime(
-                        appState.selectedDay.year,
-                        appState.selectedDay.month,
-                        appState.selectedDay.day + 1,
-                        0,
-                        0)))
-                .snapshots(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          child: user == null
+              ? Center(
+                  child: Text(
+                    'Faça login e veja suas atividades do dia!',
+                    style: const TextStyle(fontSize: 18, color: Colors.black),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('todos') // Coleção de tarefas no Firestore
+                      .where('usuarioId',
+                          isEqualTo: user?.uid) // Filtro pelo ID do usuário
+                      .where('data',
+                          isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
+                              selectedDay.year,
+                              selectedDay.month,
+                              selectedDay.day,
+                              0,
+                              0))) // Começo do dia
+                      .where('data',
+                          isLessThan: Timestamp.fromDate(DateTime(
+                              selectedDay.year,
+                              selectedDay.month,
+                              selectedDay.day + 1,
+                              0,
+                              0))) // Começo do próximo dia
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      print("Esperando dados...");
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-              // Verifica se existem tarefas para o dia selecionado
-              if (snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text('Nenhuma tarefa para hoje.'));
-              }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      print(
+                          "Nenhuma tarefa encontrada para o dia $selectedDay");
+                      return const Center(
+                          child: Text('Nenhuma tarefa para hoje.'));
+                    }
 
-              return ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                children: snapshot.data!.docs
-                    .map((data) => _buildTaskItem(context, data))
-                    .toList(),
-              );
-            },
-          ),
+                    print("Tarefas encontradas: ${snapshot.data!.docs.length}");
+                    return ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      children: snapshot.data!.docs
+                          .map((data) => _buildTaskItem(context, data))
+                          .toList(),
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -122,6 +144,9 @@ class PlannerPage extends StatelessWidget {
     final task = Task.fromSnapshot(data);
     final String corHex = task.cor ?? '0xfffeb3df';
     final Color cor = Color(int.parse(corHex));
+
+    print(
+        "Carregando tarefa: ${task.nome}"); // Print de depuração para cada tarefa
 
     return GestureDetector(
       onTap: () {

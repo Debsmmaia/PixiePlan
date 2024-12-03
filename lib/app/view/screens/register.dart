@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:trabalho_final/app/service/firestore_service.dart';
-import 'profile.dart';
+import 'package:trabalho_final/app/view/screens/home.dart';
+import 'package:trabalho_final/app/view/screens/planner.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -87,30 +90,20 @@ class RegisterPageState extends State<RegisterPage> {
               maxLength: 30,
             ),
             ElevatedButton(
-              onPressed: () {
-                salvarUsuario(_controllerEmail.text, _controllerSenha.text,
-                    _controllerNome.text);
+              onPressed: () async {
+                // Chama a função para salvar o usuário
+                await salvarUsuario(
+                  _controllerEmail.text,
+                  _controllerSenha.text,
+                  _controllerNome.text,
+                );
 
-                Navigator.of(context).pushReplacement(
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        const ProfilePage(),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.ease;
-
-                      var tween = Tween(begin: begin, end: end)
-                          .chain(CurveTween(curve: curve));
-                      var offsetAnimation = animation.drive(tween);
-
-                      return SlideTransition(
-                        position: offsetAnimation,
-                        child: child,
-                      );
-                    },
-                  ),
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const MyHomePage(
+                          title:
+                              'Página Inicial')), // Navegação para MyHomePage
                 );
               },
               child: const Text('Registrar'),
@@ -121,10 +114,33 @@ class RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  salvarUsuario(String email, String senha, String nome) {
+  // Função para salvar o usuário
+  Future<void> salvarUsuario(String email, String senha, String nome) async {
     try {
-      var fDAO = FirestoreService();
-      fDAO.criarUsuario(email, senha, nome);
-    } on Exception catch (_, ex) {}
+      // Criação do usuário no Firebase Authentication
+      var userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: senha);
+
+      // Obtenha o ID do usuário criado
+      String userId = userCredential.user?.uid ?? '';
+
+      // Salvar as informações do usuário no Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'nome': nome,
+        'email': email,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Realiza o login imediatamente após a criação
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: senha);
+
+      debugPrint("Usuário registrado e logado com sucesso!");
+    } on FirebaseException catch (e) {
+      debugPrint("Erro ao registrar usuário: ${e.message}");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erro ao criar conta: ${e.message}")),
+      );
+    }
   }
 }

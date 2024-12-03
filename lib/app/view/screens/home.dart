@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:trabalho_final/app/service/firestore_service.dart';
 import 'login.dart';
 import 'planner.dart';
 import 'new_page.dart';
@@ -23,7 +25,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    //cria a mudança de tela
+    // Cria a mudança de tela
     Widget page;
     switch (selectedIndex) {
       case 0:
@@ -36,35 +38,72 @@ class _MyHomePageState extends State<MyHomePage> {
         page = const Center(child: Text('Página Não Encontrada'));
     }
 
+    // Verifica se o usuário está autenticado
+    User? user = FirebaseAuth.instance.currentUser;
+
     return LayoutBuilder(
-      //cria widgets de forma dinâmica
       builder: (context, constraints) {
         return Scaffold(
-          //fornece estrutura básica
           drawer: Drawer(
-            //barra de navegaçaõ sanduiche
             width: 200,
             child: Column(
               children: [
-                ListTile(
-                  //lista com os ícones
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  leading: const Icon(Icons.person, color: Color(0xffd98baf)),
-                  title: const Text(
-                    'Perfil',
-                    style: TextStyle(
-                      color: Color(0xffbf567d),
-                      fontSize: 20,
+                // Exibe o nome do usuário se estiver logado, senão exibe o botão de login
+                if (user != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'Olá, ${user.displayName ?? 'Usuário'}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Color(0xffbf567d),
+                      ),
                     ),
                   ),
-                  onTap: () {
-                    setState(() {
-                      selectedIndex = 0;
-                    });
-                    Navigator.of(context).pop();
-                  },
-                ),
+                  ListTile(
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    leading:
+                        const Icon(Icons.exit_to_app, color: Color(0xffd98baf)),
+                    title: const Text(
+                      'Sair',
+                      style: TextStyle(
+                        color: Color(0xffbf567d),
+                        fontSize: 20,
+                      ),
+                    ),
+                    onTap: () async {
+                      await FirestoreService()
+                          .logout(context); // Passa o context aqui
+                      // Após o logout, redireciona para a página de login
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const LoginPage()), // Redireciona para a LoginPage
+                      );
+                    },
+                  ),
+                ],
+                if (user == null) ...[
+                  ListTile(
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    leading: const Icon(Icons.login, color: Color(0xffd98baf)),
+                    title: const Text(
+                      'Login',
+                      style: TextStyle(
+                        color: Color(0xffbf567d),
+                        fontSize: 20,
+                      ),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = 0;
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
                 ListTile(
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -77,7 +116,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   onTap: () {
-                    //ao clicar muda a página
                     setState(() {
                       selectedIndex = 1;
                     });
@@ -88,7 +126,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           appBar: AppBar(
-            //barra acima com a logo
             title: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -111,9 +148,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             const NewPage(),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          const begin =
-                              Offset(0.0, 1.0); // Inicia fora da tela, embaixo
-                          const end = Offset.zero; // Fim no centro da tela
+                          const begin = Offset(0.0, 1.0);
+                          const end = Offset.zero;
                           const curve = Curves.ease;
 
                           var tween = Tween(begin: begin, end: end)

@@ -2,13 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TodoModel {
   String? id;
+  String? usuarioId; // Associado ao ID do usuário
   final String? nome;
   final bool status;
   final DateTime? data;
-  final String? cor; // Campo para armazenar a cor como string hexadecimal
+  final String? cor; // Cor armazenada em formato hexadecimal
 
   TodoModel({
     this.id,
+    this.usuarioId,
     this.nome,
     this.status = false,
     this.data,
@@ -20,6 +22,7 @@ class TodoModel {
     try {
       return TodoModel(
         id: json['id'],
+        usuarioId: json['usuarioId'], // Adicionando o campo usuarioId
         nome: json['nome'],
         status: json['status'] ?? false,
         data: json['data'] != null
@@ -36,6 +39,7 @@ class TodoModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'usuarioId': usuarioId, // Inclui o usuarioId no mapa
       'nome': nome,
       'status': status,
       'data': data != null
@@ -47,6 +51,7 @@ class TodoModel {
 
   TodoModel copyWith({
     String? id,
+    String? usuarioId,
     String? nome,
     bool? status,
     DateTime? data,
@@ -54,6 +59,7 @@ class TodoModel {
   }) {
     return TodoModel(
       id: id ?? this.id,
+      usuarioId: usuarioId ?? this.usuarioId,
       nome: nome ?? this.nome,
       status: status ?? this.status,
       data: data ?? this.data,
@@ -63,12 +69,11 @@ class TodoModel {
 
   // Construtor para converter do Firestore para TodoModel
   factory TodoModel.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> snapshot,
-    SnapshotOptions? options,
-  ) {
-    final data = snapshot.data();
+      DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    final data = snapshot.data()!;
     return TodoModel(
-      id: data!['id'],
+      id: data['id'],
+      usuarioId: data['usuarioId'], // Lê o usuarioId
       nome: data['nome'],
       status: data['status'],
       data: (data['data'] as Timestamp?)?.toDate(), // Timestamp para DateTime

@@ -167,9 +167,7 @@ class _NewPageState extends State<NewPage> {
                         Icons.calendar_today,
                         color: Colors.white,
                       ),
-                      hintStyle: const TextStyle(
-                          color: Colors.white), // Cor do texto do hint
-
+                      hintStyle: const TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.transparent,
                     ),
