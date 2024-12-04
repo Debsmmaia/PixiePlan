@@ -16,7 +16,6 @@ class PlannerPage extends StatelessWidget {
     final DateTime now = DateTime.now();
     final DateTime firstDayOfCurrentWeek =
         now.subtract(Duration(days: now.weekday));
-    final User? user = FirebaseAuth.instance.currentUser;
     final DateTime selectedDay = appState.selectedDay ?? now;
 
     void printDebugInfo() {
@@ -48,8 +47,12 @@ class PlannerPage extends StatelessWidget {
                 itemCount: days.length,
                 itemBuilder: (context, index) {
                   final DateTime day = days[index];
-                  final bool isSelected = day.isAtSameMomentAs(selectedDay);
-                  final bool isToday = day.isAtSameMomentAs(now);
+                  final bool isSelected = day.year == selectedDay.year &&
+                      day.month == selectedDay.month &&
+                      day.day == selectedDay.day;
+                  final bool isToday = day.year == now.year &&
+                      day.month == now.month &&
+                      day.day == now.day;
                   final Color buttonColor = isSelected
                       ? const Color(0xffbf567d)
                       : (isToday
@@ -95,15 +98,15 @@ class PlannerPage extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection('todos')
                 .where('data',
-                    isGreaterThanOrEqualTo: Timestamp.fromDate(
-                      DateTime(selectedDay.year, selectedDay.month,
-                          selectedDay.day, 0, 0),
-                    ))
+                    isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
+                        selectedDay.year,
+                        selectedDay.month,
+                        selectedDay.day,
+                        0,
+                        0)))
                 .where('data',
-                    isLessThan: Timestamp.fromDate(
-                      DateTime(selectedDay.year, selectedDay.month,
-                          selectedDay.day, 23, 59, 59),
-                    ))
+                    isLessThan: Timestamp.fromDate(DateTime(selectedDay.year,
+                        selectedDay.month, selectedDay.day, 23, 59, 59)))
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -179,7 +182,7 @@ class PlannerPage extends StatelessWidget {
               task.nome,
               style: const TextStyle(
                 fontSize: 20,
-                color: Colors.white, // Cor da fonte alterada para branca
+                color: Colors.white,
               ),
               textAlign: TextAlign.left,
             ),
@@ -194,7 +197,7 @@ class PlannerPage extends StatelessWidget {
                 }
               },
               activeColor: Colors.white,
-              checkColor: Color(0xffd98baf),
+              checkColor: const Color(0xffd98baf),
             ),
           ],
         ),
@@ -213,7 +216,7 @@ class Task {
       : assert(map['nome'] != null),
         nome = map['nome'],
         cor = map['cor'],
-        status = map['status'];
+        status = map['status'] ?? false;
 
   Task.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data()! as Map<String, dynamic>,

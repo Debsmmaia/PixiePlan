@@ -24,10 +24,9 @@ class _EditNewPageState extends State<EditNewPage> {
 
   Future<void> _loadTaskData() async {
     try {
-      // Buscar dados da tarefa no Firestore usando o taskId
       DocumentSnapshot taskSnapshot = await FirebaseFirestore.instance
           .collection('todos')
-          .doc(widget.taskId) // Usando o taskId para buscar a tarefa
+          .doc(widget.taskId)
           .get();
 
       if (taskSnapshot.exists) {
@@ -38,7 +37,6 @@ class _EditNewPageState extends State<EditNewPage> {
         setState(() {});
       }
     } catch (e) {
-      // Lidar com erro ao carregar a tarefa
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Erro ao carregar a tarefa')));
     }
@@ -58,7 +56,7 @@ class _EditNewPageState extends State<EditNewPage> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Tarefa atualizada com sucesso')));
-        Navigator.of(context).pop(); // Voltar à página anterior
+        Navigator.of(context).pop();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Erro ao atualizar a tarefa')));
@@ -122,7 +120,7 @@ class _EditNewPageState extends State<EditNewPage> {
                   controller: _controller,
                   style: TextStyle(
                     fontSize: 30,
-                    color: Colors.white, // Cor branca para o texto
+                    color: Colors.white,
                   ),
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
@@ -139,24 +137,33 @@ class _EditNewPageState extends State<EditNewPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Data da tarefa',
-                      style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.white)), // Texto da data em branco
+                      style: TextStyle(fontSize: 22, color: Colors.white)),
                   SizedBox(height: 10),
                   TextFormField(
-                    onTap: () {
-                      _selectDate(context);
+                    onTap: () async {
+                      await _selectDate(context);
                     },
                     readOnly: true,
                     style: TextStyle(
-                        color: Colors.white), // Texto da data em branco
+                      color: Colors.white,
+                    ),
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
                       hintText: selectedDate != null
                           ? DateFormat('dd/MM/yyyy').format(selectedDate!)
-                          : 'Selecione uma data',
-                      suffixIcon: Icon(Icons.calendar_today,
-                          color: Colors.white), // Ícone da data em branco
+                          : '',
+                      hintStyle:
+                          TextStyle(color: Colors.white.withOpacity(0.7)),
+                      suffixIcon:
+                          Icon(Icons.calendar_today, color: Colors.white),
                     ),
                   ),
                 ],
@@ -165,16 +172,13 @@ class _EditNewPageState extends State<EditNewPage> {
             Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // Alinha os botões no centro
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Botão "Editar Tarefa"
                   ElevatedButton(
                     onPressed: _updateTask,
                     child: Text("Editar tarefa"),
                   ),
-                  const SizedBox(width: 10), // Espaçamento entre os botões
-                  // Botão "Excluir Tarefa"
+                  const SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: _deleteTask,
                     child: Text(

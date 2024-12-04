@@ -17,7 +17,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 1;
-  String _nomeUsuario = 'Usuário'; // Variável para armazenar o nome do usuário
+  String _nomeUsuario = 'Usuário';
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
             width: 200,
             child: Column(
               children: [
-                // Exibe o nome do usuário se estiver logado, senão exibe o botão de login
+                // Exibe o nome do usuário
                 if (user != null) ...[
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -91,13 +91,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     onTap: () async {
-                      await FirestoreService()
-                          .logout(context); // Passa o context aqui
-                      // Após o logout, redireciona para a página de login
+                      await FirestoreService().logout(context);
+                      // Depois de login redireciona
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                            builder: (context) =>
-                                const LoginPage()), // Redireciona para a LoginPage
+                            builder: (context) => const LoginPage()),
                       );
                     },
                   ),
@@ -187,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   shape: const CircleBorder(),
                   child: const Icon(Icons.add),
                 )
-              : null, // Não exibe o FAB nas outras telas
+              : null,
         );
       },
     );

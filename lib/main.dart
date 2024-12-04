@@ -35,20 +35,14 @@ class MyApp extends StatelessWidget {
       User? user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        // O usuário está autenticado, redireciona para a página principal ou outra
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  PlannerPage()), // Substitua pela página principal
+          MaterialPageRoute(builder: (context) => PlannerPage()),
         );
       } else {
-        // O usuário não está autenticado, redireciona para a tela de login
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  LoginPage()), // Substitua pela página de login
+          MaterialPageRoute(builder: (context) => LoginPage()),
         );
       }
     }
