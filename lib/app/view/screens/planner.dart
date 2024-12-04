@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trabalho_final/app/view/screens/new_page.dart';
 import '../state/my_app_state.dart';
 import 'edit_new_page.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Certifique-se de importar o Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PlannerPage extends StatelessWidget {
   const PlannerPage({super.key});
@@ -13,16 +13,21 @@ class PlannerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<MyAppState>();
-    DateTime now = DateTime.now(); // Data atual
-    DateTime firstDayOfCurrentWeek = now.subtract(Duration(days: now.weekday));
+    final DateTime now = DateTime.now();
+    final DateTime firstDayOfCurrentWeek =
+        now.subtract(Duration(days: now.weekday));
+    final User? user = FirebaseAuth.instance.currentUser;
+    final DateTime selectedDay = appState.selectedDay ?? now;
 
-    User? user =
-        FirebaseAuth.instance.currentUser; // Pega o usuário autenticado
+    void printDebugInfo() {
+      print("Data selecionada: $selectedDay");
+      print(
+          "Início do dia: ${DateTime(selectedDay.year, selectedDay.month, selectedDay.day, 0, 0)}");
+      print(
+          "Fim do dia: ${DateTime(selectedDay.year, selectedDay.month, selectedDay.day, 23, 59, 59)}");
+    }
 
-    print('User UID: ${user?.uid}'); // Verifica o UID do usuário autenticado
-
-    // Armazene o valor selecionado como uma cópia da data
-    DateTime selectedDay = appState.selectedDay ?? now;
+    printDebugInfo();
 
     return Column(
       children: [
@@ -31,20 +36,21 @@ class PlannerPage extends StatelessWidget {
           height: 70,
           child: PageView.builder(
             itemBuilder: (context, pageIndex) {
-              DateTime firstDayOfWeek =
+              final DateTime firstDayOfWeek =
                   firstDayOfCurrentWeek.add(Duration(days: pageIndex * 7));
-              List<DateTime> days = List.generate(
-                  7, (index) => firstDayOfWeek.add(Duration(days: index)));
+              final List<DateTime> days = List.generate(
+                7,
+                (index) => firstDayOfWeek.add(Duration(days: index)),
+              );
 
               return ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: days.length,
                 itemBuilder: (context, index) {
-                  DateTime day = days[index];
-                  bool isSelected = day.isAtSameMomentAs(selectedDay);
-                  bool isToday = day.isAtSameMomentAs(now);
-
-                  Color buttonColor = isSelected
+                  final DateTime day = days[index];
+                  final bool isSelected = day.isAtSameMomentAs(selectedDay);
+                  final bool isToday = day.isAtSameMomentAs(now);
+                  final Color buttonColor = isSelected
                       ? const Color(0xffbf567d)
                       : (isToday
                           ? const Color(0xffae114b)
@@ -83,58 +89,41 @@ class PlannerPage extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: 20), // Espaçamento entre os containers
+        const SizedBox(height: 20),
         Expanded(
-          child: user == null
-              ? Center(
-                  child: Text(
-                    'Faça login e veja suas atividades do dia!',
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('todos') // Coleção de tarefas no Firestore
-                      .where('usuarioId',
-                          isEqualTo: user?.uid) // Filtro pelo ID do usuário
-                      .where('data',
-                          isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
-                              selectedDay.year,
-                              selectedDay.month,
-                              selectedDay.day,
-                              0,
-                              0))) // Começo do dia
-                      .where('data',
-                          isLessThan: Timestamp.fromDate(DateTime(
-                              selectedDay.year,
-                              selectedDay.month,
-                              selectedDay.day + 1,
-                              0,
-                              0))) // Começo do próximo dia
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      print("Esperando dados...");
-                      return const Center(child: CircularProgressIndicator());
-                    }
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('todos')
+                .where('data',
+                    isGreaterThanOrEqualTo: Timestamp.fromDate(
+                      DateTime(selectedDay.year, selectedDay.month,
+                          selectedDay.day, 0, 0),
+                    ))
+                .where('data',
+                    isLessThan: Timestamp.fromDate(
+                      DateTime(selectedDay.year, selectedDay.month,
+                          selectedDay.day, 23, 59, 59),
+                    ))
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      print(
-                          "Nenhuma tarefa encontrada para o dia $selectedDay");
-                      return const Center(
-                          child: Text('Nenhuma tarefa para hoje.'));
-                    }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(
+                  child: Text('Nenhuma tarefa para hoje.'),
+                );
+              }
 
-                    print("Tarefas encontradas: ${snapshot.data!.docs.length}");
-                    return ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      children: snapshot.data!.docs
-                          .map((data) => _buildTaskItem(context, data))
-                          .toList(),
-                    );
-                  },
-                ),
+              return ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                children: snapshot.data!.docs
+                    .map((data) => _buildTaskItem(context, data))
+                    .toList(),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -145,49 +134,34 @@ class PlannerPage extends StatelessWidget {
     final String corHex = task.cor ?? '0xfffeb3df';
     final Color cor = Color(int.parse(corHex));
 
-    print(
-        "Carregando tarefa: ${task.nome}"); // Print de depuração para cada tarefa
-
     return GestureDetector(
       onTap: () {
-        final taskId = task.reference.id;
+        Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                EditNewPage(taskId: task.reference.id),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+              final tween =
+                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              final offsetAnimation = animation.drive(tween);
 
-        if (taskId != null) {
-          // Navegação para a página de edição
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  EditNewPage(
-                      taskId: taskId), // Passando taskId para EditNewPage
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                const begin = Offset(0.0, 1.0);
-                const end = Offset.zero;
-                const curve = Curves.ease;
-
-                var tween = Tween(begin: begin, end: end)
-                    .chain(CurveTween(curve: curve));
-                var offsetAnimation = animation.drive(tween);
-
-                return SlideTransition(
-                  position: offsetAnimation,
-                  child: child,
-                );
-              },
-            ),
-          );
-        } else {
-          // Se o taskId for nulo, exibe um erro
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Erro: Tarefa não encontrada")),
-          );
-        }
+              return SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              );
+            },
+          ),
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: cor, // Cor da tarefa obtida do banco
+          color: cor,
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
@@ -198,13 +172,31 @@ class PlannerPage extends StatelessWidget {
             ),
           ],
         ),
-        child: Text(
-          task.nome,
-          style: const TextStyle(
-            fontSize: 20,
-            color: Color(0xff302d2d),
-          ),
-          textAlign: TextAlign.left,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              task.nome,
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.white, // Cor da fonte alterada para branca
+              ),
+              textAlign: TextAlign.left,
+            ),
+            Checkbox(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              value: task.status,
+              onChanged: (bool? value) {
+                if (value != null) {
+                  task.reference.update({'status': value});
+                }
+              },
+              activeColor: Colors.white,
+              checkColor: Color(0xffd98baf),
+            ),
+          ],
         ),
       ),
     );
@@ -214,17 +206,19 @@ class PlannerPage extends StatelessWidget {
 class Task {
   final String nome;
   final String? cor;
+  final bool status;
   final DocumentReference reference;
 
   Task.fromMap(Map<String, dynamic> map, {required this.reference})
       : assert(map['nome'] != null),
         nome = map['nome'],
-        cor = map['cor'];
+        cor = map['cor'],
+        status = map['status'];
 
   Task.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data()! as Map<String, dynamic>,
             reference: snapshot.reference);
 
   @override
-  String toString() => "Task<$nome, cor: $cor>";
+  String toString() => "Task<$nome, cor: $cor, status: $status>";
 }

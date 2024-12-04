@@ -120,7 +120,10 @@ class _EditNewPageState extends State<EditNewPage> {
               child: Center(
                 child: TextFormField(
                   controller: _controller,
-                  style: TextStyle(fontSize: 30),
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white, // Cor branca para o texto
+                  ),
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     hintText: "Nome da tarefa",
@@ -135,19 +138,25 @@ class _EditNewPageState extends State<EditNewPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Data da tarefa', style: TextStyle(fontSize: 22)),
+                  Text('Data da tarefa',
+                      style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.white)), // Texto da data em branco
                   SizedBox(height: 10),
                   TextFormField(
                     onTap: () {
                       _selectDate(context);
                     },
                     readOnly: true,
+                    style: TextStyle(
+                        color: Colors.white), // Texto da data em branco
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       hintText: selectedDate != null
                           ? DateFormat('dd/MM/yyyy').format(selectedDate!)
                           : 'Selecione uma data',
-                      suffixIcon: Icon(Icons.calendar_today),
+                      suffixIcon: Icon(Icons.calendar_today,
+                          color: Colors.white), // Ícone da data em branco
                     ),
                   ),
                 ],

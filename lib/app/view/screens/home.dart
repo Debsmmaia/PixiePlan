@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trabalho_final/app/service/firestore_service.dart';
 import 'login.dart';
 import 'planner.dart';
@@ -16,11 +17,28 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 1;
+  String _nomeUsuario = 'Usuário'; // Variável para armazenar o nome do usuário
 
+  @override
   void initState() {
     super.initState();
     // Bloquear a tela para orientação vertical
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    // Buscar os dados do usuário
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _nomeUsuario = userDoc['nome'] ?? 'Usuário';
+      });
+    }
   }
 
   @override
@@ -53,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      'Olá, ${user.displayName ?? 'Usuário'}',
+                      'Olá, $_nomeUsuario',
                       style: const TextStyle(
                         fontSize: 20,
                         color: Color(0xffbf567d),
@@ -61,8 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   ListTile(
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 10),
                     leading:
                         const Icon(Icons.exit_to_app, color: Color(0xffd98baf)),
                     title: const Text(
@@ -86,8 +104,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
                 if (user == null) ...[
                   ListTile(
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 10),
                     leading: const Icon(Icons.login, color: Color(0xffd98baf)),
                     title: const Text(
                       'Login',
@@ -106,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
                 ListTile(
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   leading: const Icon(Icons.book, color: Color(0xffd98baf)),
                   title: const Text(
                     'Meu Planner',

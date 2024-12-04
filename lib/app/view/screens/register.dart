@@ -16,6 +16,7 @@ class RegisterPageState extends State<RegisterPage> {
   final TextEditingController _controllerNome = TextEditingController();
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerSenha = TextEditingController();
+  bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -72,19 +73,20 @@ class RegisterPageState extends State<RegisterPage> {
             TextFormField(
               controller: _controllerSenha,
               style: const TextStyle(fontSize: 20),
-              decoration: const InputDecoration(
+              obscureText: _obscureText,
+              decoration: InputDecoration(
                 hintText: "Senha",
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.grey, // Cor da borda padrão
-                    width: 1.0,
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey,
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Color(0xffbf567d), // Cor da borda ao focar
-                    width: 2.0,
-                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
                 ),
               ),
               maxLength: 30,

@@ -90,8 +90,8 @@ class _NewPageState extends State<NewPage> {
                 child: TextFormField(
                   controller: _controller,
                   style: const TextStyle(
-                    fontSize: 30, // Tamanho da fonte
-                    color: Colors.white, // Cor do texto (branca)
+                    fontSize: 30,
+                    color: Colors.white,
                   ),
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
