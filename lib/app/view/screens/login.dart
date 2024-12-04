@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:trabalho_final/app/view/screens/planner.dart'; // Substitua pelo seu arquivo de perfil
-import 'package:trabalho_final/app/view/screens/register.dart'; // Tela de cadastro
-import 'package:trabalho_final/app/view/screens/home.dart'; // A página inicial, onde o "X" vai redirecionar
+import 'package:trabalho_final/app/view/screens/planner.dart';
+import 'package:trabalho_final/app/view/screens/register.dart';
+import 'package:trabalho_final/app/view/screens/home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
